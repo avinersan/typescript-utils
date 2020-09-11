@@ -1,6 +1,7 @@
 import * as iots from './iots';
 import { isRight, isLeft } from 'fp-ts/lib/Either';
 import assert from 'assert';
+import { string } from 'io-ts';
 
 describe('iots', () => {
   describe('stringEnum', () => {
@@ -29,4 +30,30 @@ describe('iots', () => {
       assert(isLeft(res));
     });
   });
+
+  describe('partialNull', () => {
+    const ioType = iots.partialOrNull(
+      {
+        one: string,
+        two: string,
+      }
+      , 'TestEnum',
+    );
+
+    [
+      [{ one: '1', two: null }],
+      [{ one: '1', two: undefined }],
+      [{ one: '1', two: undefined }],
+      [{}],
+      [{ one: '1' }]
+    ].forEach(([input]) => {
+      it(`should decode input ${JSON.stringify(input)} and output strict equals input.`, () => {
+        const res = ioType.decode(input);
+
+        assert(isRight(res));
+        expect(res.right).toStrictEqual(input);
+      });
+    });
+  });
+
 });
